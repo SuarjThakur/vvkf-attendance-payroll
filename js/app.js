@@ -128,24 +128,41 @@ function showPage(page) {
 
   const info = pageInfo[page];
 
+
   if (info) {
 
-    document.getElementById("pageTitle").textContent =
-      info.title;
+    const title =
+      document.getElementById("pageTitle");
 
-    document.getElementById("pageSubtitle").textContent =
-      info.subtitle;
+    const subtitle =
+      document.getElementById("pageSubtitle");
+
+    if (title) {
+      title.textContent = info.title;
+    }
+
+    if (subtitle) {
+      subtitle.textContent = info.subtitle;
+    }
 
   }
 
 
   // ----------------------------------------------------------
-  // LOAD EMPLOYEE MODULE
+  // EMPLOYEE PAGE
   // ----------------------------------------------------------
 
   if (page === "employees") {
 
     renderEmployeesPage();
+
+    // If data has not arrived yet,
+    // load it again.
+    if (employees.length === 0) {
+
+      loadEmployees();
+
+    }
 
   }
 
@@ -172,8 +189,11 @@ function setCurrentDate() {
     today.toLocaleDateString("en-IN", {
 
       weekday: "short",
+
       day: "2-digit",
+
       month: "short",
+
       year: "numeric"
 
     });
@@ -190,7 +210,19 @@ async function loadEmployees() {
   try {
 
     const response =
-      await fetch(API_URL + "?action=getEmployees");
+      await fetch(
+        API_URL + "?action=getEmployees"
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Unable to connect to Google Sheets API."
+      );
+
+    }
+
 
     const result =
       await response.json();
@@ -199,22 +231,53 @@ async function loadEmployees() {
     if (!result.success) {
 
       throw new Error(
-        result.error || "Unable to load employees."
+        result.error ||
+        "Unable to load employees."
       );
 
     }
 
 
-    employees = result.data || [];
+    employees =
+      result.data || [];
 
 
+    // Update dashboard
     updateDashboard();
+
+
+    // IMPORTANT:
+    // If Employees page is currently open,
+    // refresh the table after data arrives.
+
+    const employeesPage =
+      document.getElementById("employeesPage");
+
+
+    if (
+      employeesPage &&
+      employeesPage.classList.contains("active-page")
+    ) {
+
+      renderEmployeesPage();
+
+    }
+
 
   }
 
   catch (error) {
 
-    console.error("Employee loading error:", error);
+    console.error(
+      "Employee loading error:",
+      error
+    );
+
+
+    // Keep application working even if
+    // API temporarily fails.
+
+    updateDashboard();
 
   }
 
@@ -234,18 +297,23 @@ function updateDashboard() {
   const active =
     employees.filter(function (employee) {
 
-      return String(employee.status)
-        .toUpperCase() === "ACTIVE";
+      return String(
+        employee.status || ""
+      ).toUpperCase() === "ACTIVE";
 
     }).length;
 
 
   const totalElement =
-    document.getElementById("totalEmployees");
+    document.getElementById(
+      "totalEmployees"
+    );
 
 
   const activeElement =
-    document.getElementById("activeEmployees");
+    document.getElementById(
+      "activeEmployees"
+    );
 
 
   if (totalElement) {
@@ -276,7 +344,9 @@ function updateDashboard() {
 function renderDepartmentSummary() {
 
   const container =
-    document.getElementById("departmentSummary");
+    document.getElementById(
+      "departmentSummary"
+    );
 
 
   if (!container) return;
@@ -323,6 +393,7 @@ function renderDepartmentSummary() {
       const row =
         document.createElement("div");
 
+
       row.className =
         "department-row";
 
@@ -354,7 +425,9 @@ function renderDepartmentSummary() {
 function renderEmployeesPage() {
 
   const page =
-    document.getElementById("employeesPage");
+    document.getElementById(
+      "employeesPage"
+    );
 
 
   if (!page) return;
@@ -375,6 +448,7 @@ function renderEmployeesPage() {
         </p>
 
       </div>
+
 
       <button
         class="primary-button"
@@ -404,17 +478,7 @@ function renderEmployeesPage() {
           All Departments
         </option>
 
-        <option value="STAFF">STAFF</option>
-        <option value="SINKER">SINKER</option>
-        <option value="INTER">INTER</option>
-        <option value="AUTO">AUTO</option>
-        <option value="COLLOR">COLLOR</option>
-        <option value="MENDING">MENDING</option>
-        <option value="DRIVER">DRIVER</option>
-        <option value="GATE">GATE</option>
-        <option value="BOILER">BOILER</option>
-        <option value="HELPER">HELPER</option>
-        <option value="SR. HELPER">SR. HELPER</option>
+        ${getDepartmentOptions("")}
 
       </select>
 
@@ -484,36 +548,68 @@ function renderEmployeesPage() {
   `;
 
 
-  document
-    .getElementById("addEmployeeButton")
-    .addEventListener(
+  const addButton =
+    document.getElementById(
+      "addEmployeeButton"
+    );
+
+
+  if (addButton) {
+
+    addButton.addEventListener(
       "click",
       openAddEmployeeModal
     );
 
+  }
 
-  document
-    .getElementById("employeeSearch")
-    .addEventListener(
+
+  const search =
+    document.getElementById(
+      "employeeSearch"
+    );
+
+
+  if (search) {
+
+    search.addEventListener(
       "input",
       filterEmployees
     );
 
+  }
 
-  document
-    .getElementById("departmentFilter")
-    .addEventListener(
+
+  const department =
+    document.getElementById(
+      "departmentFilter"
+    );
+
+
+  if (department) {
+
+    department.addEventListener(
       "change",
       filterEmployees
     );
 
+  }
 
-  document
-    .getElementById("statusFilter")
-    .addEventListener(
+
+  const status =
+    document.getElementById(
+      "statusFilter"
+    );
+
+
+  if (status) {
+
+    status.addEventListener(
       "change",
       filterEmployees
     );
+
+  }
 
 
   renderEmployeeTable(employees);
@@ -528,7 +624,9 @@ function renderEmployeesPage() {
 function renderEmployeeTable(data) {
 
   const tbody =
-    document.getElementById("employeeTableBody");
+    document.getElementById(
+      "employeeTableBody"
+    );
 
 
   if (!tbody) return;
@@ -537,7 +635,7 @@ function renderEmployeeTable(data) {
   tbody.innerHTML = "";
 
 
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
 
     tbody.innerHTML = `
 
@@ -567,59 +665,85 @@ function renderEmployeeTable(data) {
 
 
     const status =
-      String(employee.status || "ACTIVE")
-        .toUpperCase();
+      String(
+        employee.status || "ACTIVE"
+      ).toUpperCase();
 
 
     row.innerHTML = `
 
       <td>
+
         <strong>
-          ${escapeHtml(employee.employeeId)}
+          ${escapeHtml(
+            employee.employeeId || ""
+          )}
         </strong>
+
       </td>
 
 
       <td>
-        ${escapeHtml(employee.name)}
+        ${escapeHtml(
+          employee.name || ""
+        )}
       </td>
 
 
       <td>
-        ${escapeHtml(employee.department)}
+        ${escapeHtml(
+          employee.department || ""
+        )}
       </td>
 
 
       <td>
-        ${formatCurrency(employee.salary)}
+        ${formatCurrency(
+          employee.salary
+        )}
       </td>
 
 
       <td>
-        ${employee.sundayPay === "" ||
+
+        ${
+          employee.sundayPay === "" ||
           employee.sundayPay == null
+
           ? "—"
-          : formatCurrency(employee.sundayPay)}
+
+          : formatCurrency(
+              employee.sundayPay
+            )
+
+        }
+
       </td>
 
 
       <td>
-        ${employee.workingHours === "" ||
+
+        ${
+          employee.workingHours === "" ||
           employee.workingHours == null
+
           ? "—"
-          : employee.workingHours + " hrs"}
+
+          : employee.workingHours + " hrs"
+
+        }
+
       </td>
 
 
       <td>
 
-        <span class="status-badge ${
-
-          status === "ACTIVE"
-            ? "status-active"
-            : "status-inactive"
-
-        }">
+        <span
+          class="status-badge ${
+            status === "ACTIVE"
+              ? "status-active"
+              : "status-inactive"
+          }">
 
           ${status}
 
@@ -632,7 +756,9 @@ function renderEmployeeTable(data) {
 
         <button
           class="edit-button"
-          data-employee-id="${escapeHtml(employee.employeeId)}">
+          data-employee-id="${escapeHtml(
+            employee.employeeId || ""
+          )}">
 
           Edit
 
@@ -659,18 +785,24 @@ function renderEmployeeTable(data) {
           const id =
             this.dataset.employeeId;
 
+
           const employee =
-            employees.find(function (item) {
+            employees.find(
+              function (item) {
 
-              return String(item.employeeId) ===
-                String(id);
+                return String(
+                  item.employeeId
+                ) === String(id);
 
-            });
+              }
+            );
 
 
           if (employee) {
 
-            openEditEmployeeModal(employee);
+            openEditEmployeeModal(
+              employee
+            );
 
           }
 
@@ -688,68 +820,105 @@ function renderEmployeeTable(data) {
 
 function filterEmployees() {
 
+  const searchElement =
+    document.getElementById(
+      "employeeSearch"
+    );
+
+
+  const departmentElement =
+    document.getElementById(
+      "departmentFilter"
+    );
+
+
+  const statusElement =
+    document.getElementById(
+      "statusFilter"
+    );
+
+
   const search =
-    document
-      .getElementById("employeeSearch")
-      .value
-      .toLowerCase()
-      .trim();
+    searchElement
+      ? searchElement.value
+          .toLowerCase()
+          .trim()
+      : "";
 
 
   const department =
-    document
-      .getElementById("departmentFilter")
-      .value;
+    departmentElement
+      ? departmentElement.value
+      : "";
 
 
   const status =
-    document
-      .getElementById("statusFilter")
-      .value;
+    statusElement
+      ? statusElement.value
+      : "";
 
 
   const filtered =
-    employees.filter(function (employee) {
+    employees.filter(
+      function (employee) {
 
-      const matchesSearch =
-
-        !search ||
-
-        String(employee.employeeId)
-          .toLowerCase()
-          .includes(search) ||
-
-        String(employee.name)
-          .toLowerCase()
-          .includes(search) ||
-
-        String(employee.department)
-          .toLowerCase()
-          .includes(search);
+        const employeeId =
+          String(
+            employee.employeeId || ""
+          ).toLowerCase();
 
 
-      const matchesDepartment =
-
-        !department ||
-
-        employee.department === department;
-
-
-      const matchesStatus =
-
-        !status ||
-
-        String(employee.status)
-          .toUpperCase() === status;
+        const name =
+          String(
+            employee.name || ""
+          ).toLowerCase();
 
 
-      return (
-        matchesSearch &&
-        matchesDepartment &&
-        matchesStatus
-      );
+        const employeeDepartment =
+          String(
+            employee.department || ""
+          ).toLowerCase();
 
-    });
+
+        const matchesSearch =
+
+          !search ||
+
+          employeeId.includes(search) ||
+
+          name.includes(search) ||
+
+          employeeDepartment.includes(search);
+
+
+        const matchesDepartment =
+
+          !department ||
+
+          employee.department === department;
+
+
+        const matchesStatus =
+
+          !status ||
+
+          String(
+            employee.status || ""
+          ).toUpperCase() === status;
+
+
+        return (
+
+          matchesSearch &&
+
+          matchesDepartment &&
+
+          matchesStatus
+
+        );
+
+      }
+    );
 
 
   renderEmployeeTable(filtered);
@@ -758,7 +927,7 @@ function filterEmployees() {
 
 
 // ============================================================
-// ADD EMPLOYEE MODAL
+// ADD EMPLOYEE
 // ============================================================
 
 function openAddEmployeeModal() {
@@ -769,7 +938,7 @@ function openAddEmployeeModal() {
 
 
 // ============================================================
-// EDIT EMPLOYEE MODAL
+// EDIT EMPLOYEE
 // ============================================================
 
 function openEditEmployeeModal(employee) {
@@ -783,10 +952,25 @@ function openEditEmployeeModal(employee) {
 // EMPLOYEE MODAL
 // ============================================================
 
-function showEmployeeModal(employee = null) {
+function showEmployeeModal(
+  employee = null
+) {
 
   const isEdit =
     employee !== null;
+
+
+  const oldModal =
+    document.getElementById(
+      "employeeModal"
+    );
+
+
+  if (oldModal) {
+
+    oldModal.remove();
+
+  }
 
 
   const modal =
@@ -811,13 +995,23 @@ function showEmployeeModal(employee = null) {
         <div>
 
           <h2>
-            ${isEdit ? "Edit Employee" : "Add Employee"}
+
+            ${
+              isEdit
+                ? "Edit Employee"
+                : "Add Employee"
+            }
+
           </h2>
 
           <p>
-            ${isEdit
-              ? "Update employee information."
-              : "Create a new employee record."}
+
+            ${
+              isEdit
+                ? "Update employee information."
+                : "Create a new employee record."
+            }
+
           </p>
 
         </div>
@@ -839,36 +1033,49 @@ function showEmployeeModal(employee = null) {
 
         ${
           isEdit
-            ? `
-              <div class="form-group">
 
-                <label>
-                  Employee ID
-                </label>
+          ? `
 
-                <input
-                  type="text"
-                  value="${escapeHtml(employee.employeeId)}"
-                  disabled>
+            <div class="form-group">
 
-              </div>
-            `
-            : `
-              <div class="auto-id-note">
+              <label>
+                Employee ID
+              </label>
 
-                Employee ID will be generated automatically
-                based on department.
+              <input
+                type="text"
+                value="${escapeHtml(
+                  employee.employeeId
+                )}"
+                disabled>
 
-              </div>
-            `
+            </div>
+
+          `
+
+          : `
+
+            <div class="auto-id-note">
+
+              Employee ID will be generated
+              automatically based on department.
+
+            </div>
+
+          `
+
         }
 
 
         <div class="form-group">
 
           <label>
-            Name <span>*</span>
+
+            Name
+            <span>*</span>
+
           </label>
+
 
           <input
             type="text"
@@ -887,8 +1094,12 @@ function showEmployeeModal(employee = null) {
         <div class="form-group">
 
           <label>
-            Department <span>*</span>
+
+            Department
+            <span>*</span>
+
           </label>
+
 
           <select
             id="employeeDepartment"
@@ -912,8 +1123,12 @@ function showEmployeeModal(employee = null) {
         <div class="form-group">
 
           <label>
-            Salary <span>*</span>
+
+            Salary
+            <span>*</span>
+
           </label>
+
 
           <input
             type="number"
@@ -939,6 +1154,7 @@ function showEmployeeModal(employee = null) {
               Sunday Pay
             </label>
 
+
             <input
               type="number"
               id="employeeSundayPay"
@@ -958,6 +1174,7 @@ function showEmployeeModal(employee = null) {
             <label>
               Working Hours
             </label>
+
 
             <input
               type="number"
@@ -980,8 +1197,12 @@ function showEmployeeModal(employee = null) {
         <div class="form-group">
 
           <label>
-            Status <span>*</span>
+
+            Status
+            <span>*</span>
+
           </label>
+
 
           <select
             id="employeeStatus"
@@ -999,6 +1220,7 @@ function showEmployeeModal(employee = null) {
               ACTIVE
 
             </option>
+
 
             <option
               value="INACTIVE"
@@ -1026,6 +1248,7 @@ function showEmployeeModal(employee = null) {
 
         <div class="modal-actions">
 
+
           <button
             type="button"
             class="secondary-button"
@@ -1049,6 +1272,7 @@ function showEmployeeModal(employee = null) {
 
           </button>
 
+
         </div>
 
 
@@ -1063,7 +1287,9 @@ function showEmployeeModal(employee = null) {
 
 
   document
-    .getElementById("closeEmployeeModal")
+    .getElementById(
+      "closeEmployeeModal"
+    )
     .addEventListener(
       "click",
       closeEmployeeModal
@@ -1071,7 +1297,9 @@ function showEmployeeModal(employee = null) {
 
 
   document
-    .getElementById("cancelEmployee")
+    .getElementById(
+      "cancelEmployee"
+    )
     .addEventListener(
       "click",
       closeEmployeeModal
@@ -1079,7 +1307,9 @@ function showEmployeeModal(employee = null) {
 
 
   document
-    .getElementById("employeeForm")
+    .getElementById(
+      "employeeForm"
+    )
     .addEventListener(
       "submit",
       function (event) {
@@ -1089,9 +1319,13 @@ function showEmployeeModal(employee = null) {
 
         if (isEdit) {
 
-          updateEmployee(employee.employeeId);
+          updateEmployee(
+            employee.employeeId
+          );
 
-        } else {
+        }
+
+        else {
 
           saveEmployee();
 
@@ -1107,44 +1341,58 @@ function showEmployeeModal(employee = null) {
 // DEPARTMENT OPTIONS
 // ============================================================
 
-function getDepartmentOptions(selected) {
+function getDepartmentOptions(
+  selected
+) {
 
   const departments = [
 
     "STAFF",
+
     "SINKER",
+
     "INTER",
+
     "AUTO",
+
     "COLLOR",
+
     "MENDING",
+
     "DRIVER",
+
     "GATE",
+
     "BOILER",
+
     "HELPER",
+
     "SR. HELPER"
 
   ];
 
 
-  return departments.map(function (department) {
+  return departments
+    .map(function (department) {
 
-    return `
+      return `
 
-      <option
-        value="${department}"
-        ${
-          department === selected
-            ? "selected"
-            : ""
-        }>
+        <option
+          value="${department}"
+          ${
+            department === selected
+              ? "selected"
+              : ""
+          }>
 
-        ${department}
+          ${department}
 
-      </option>
+        </option>
 
-    `;
+      `;
 
-  }).join("");
+    })
+    .join("");
 
 }
 
@@ -1156,52 +1404,70 @@ function getDepartmentOptions(selected) {
 async function saveEmployee() {
 
   const button =
-    document.getElementById("saveEmployeeButton");
+    document.getElementById(
+      "saveEmployeeButton"
+    );
 
 
   const message =
-    document.getElementById("employeeFormMessage");
+    document.getElementById(
+      "employeeFormMessage"
+    );
 
 
   const employee = {
 
     name:
       document
-        .getElementById("employeeName")
+        .getElementById(
+          "employeeName"
+        )
         .value
         .trim(),
 
     department:
       document
-        .getElementById("employeeDepartment")
+        .getElementById(
+          "employeeDepartment"
+        )
         .value,
 
     salary:
       document
-        .getElementById("employeeSalary")
+        .getElementById(
+          "employeeSalary"
+        )
         .value,
 
     sundayPay:
       document
-        .getElementById("employeeSundayPay")
+        .getElementById(
+          "employeeSundayPay"
+        )
         .value,
 
     workingHours:
       document
-        .getElementById("employeeWorkingHours")
+        .getElementById(
+          "employeeWorkingHours"
+        )
         .value,
 
     status:
       document
-        .getElementById("employeeStatus")
+        .getElementById(
+          "employeeStatus"
+        )
         .value
 
   };
 
 
-  if (!employee.name ||
-      !employee.department ||
-      !employee.salary) {
+  if (
+    !employee.name ||
+    !employee.department ||
+    !employee.salary
+  ) {
 
     showFormMessage(
       "Please fill all mandatory fields.",
@@ -1213,28 +1479,49 @@ async function saveEmployee() {
   }
 
 
-  button.disabled = true;
-
-  button.textContent =
-    "Saving...";
-
-
   try {
 
+    button.disabled = true;
+
+    button.textContent =
+      "Saving...";
+
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body: JSON.stringify({
+
+            action:
+              "addEmployee",
+
+            data:
+              employee
+
+          })
+
+        }
+      );
+
+
     const result =
-      await postRequest({
-
-        action: "addEmployee",
-
-        data: employee
-
-      });
+      await response.json();
 
 
     if (!result.success) {
 
       throw new Error(
-        result.error || "Unable to save employee."
+        result.error ||
+        "Unable to save employee."
       );
 
     }
@@ -1249,13 +1536,10 @@ async function saveEmployee() {
     await loadEmployees();
 
 
-    setTimeout(function () {
-
-      closeEmployeeModal();
-
-      renderEmployeesPage();
-
-    }, 700);
+    setTimeout(
+      closeEmployeeModal,
+      700
+    );
 
 
   }
@@ -1266,7 +1550,8 @@ async function saveEmployee() {
 
 
     showFormMessage(
-      error.message,
+      error.message ||
+      "Unable to save employee.",
       "error"
     );
 
@@ -1285,53 +1570,78 @@ async function saveEmployee() {
 // UPDATE EMPLOYEE
 // ============================================================
 
-async function updateEmployee(employeeId) {
+async function updateEmployee(
+  employeeId
+) {
 
   const button =
-    document.getElementById("saveEmployeeButton");
+    document.getElementById(
+      "saveEmployeeButton"
+    );
+
+
+  const message =
+    document.getElementById(
+      "employeeFormMessage"
+    );
 
 
   const employee = {
 
-    employeeId: employeeId,
+    employeeId:
+      employeeId,
 
     name:
       document
-        .getElementById("employeeName")
+        .getElementById(
+          "employeeName"
+        )
         .value
         .trim(),
 
     department:
       document
-        .getElementById("employeeDepartment")
+        .getElementById(
+          "employeeDepartment"
+        )
         .value,
 
     salary:
       document
-        .getElementById("employeeSalary")
+        .getElementById(
+          "employeeSalary"
+        )
         .value,
 
     sundayPay:
       document
-        .getElementById("employeeSundayPay")
+        .getElementById(
+          "employeeSundayPay"
+        )
         .value,
 
     workingHours:
       document
-        .getElementById("employeeWorkingHours")
+        .getElementById(
+          "employeeWorkingHours"
+        )
         .value,
 
     status:
       document
-        .getElementById("employeeStatus")
+        .getElementById(
+          "employeeStatus"
+        )
         .value
 
   };
 
 
-  if (!employee.name ||
-      !employee.department ||
-      !employee.salary) {
+  if (
+    !employee.name ||
+    !employee.department ||
+    !employee.salary
+  ) {
 
     showFormMessage(
       "Please fill all mandatory fields.",
@@ -1343,28 +1653,49 @@ async function updateEmployee(employeeId) {
   }
 
 
-  button.disabled = true;
-
-  button.textContent =
-    "Updating...";
-
-
   try {
 
+    button.disabled = true;
+
+    button.textContent =
+      "Updating...";
+
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body: JSON.stringify({
+
+            action:
+              "updateEmployee",
+
+            data:
+              employee
+
+          })
+
+        }
+      );
+
+
     const result =
-      await postRequest({
-
-        action: "updateEmployee",
-
-        data: employee
-
-      });
+      await response.json();
 
 
     if (!result.success) {
 
       throw new Error(
-        result.error || "Unable to update employee."
+        result.error ||
+        "Unable to update employee."
       );
 
     }
@@ -1379,21 +1710,22 @@ async function updateEmployee(employeeId) {
     await loadEmployees();
 
 
-    setTimeout(function () {
-
-      closeEmployeeModal();
-
-      renderEmployeesPage();
-
-    }, 700);
+    setTimeout(
+      closeEmployeeModal,
+      700
+    );
 
 
   }
 
   catch (error) {
 
+    console.error(error);
+
+
     showFormMessage(
-      error.message,
+      error.message ||
+      "Unable to update employee.",
       "error"
     );
 
@@ -1409,42 +1741,15 @@ async function updateEmployee(employeeId) {
 
 
 // ============================================================
-// POST REQUEST
-// ============================================================
-
-async function postRequest(data) {
-
-  const response =
-    await fetch(API_URL, {
-
-      method: "POST",
-
-      headers: {
-
-        "Content-Type":
-          "text/plain;charset=utf-8"
-
-      },
-
-      body:
-        JSON.stringify(data)
-
-    });
-
-
-  return await response.json();
-
-}
-
-
-// ============================================================
 // CLOSE MODAL
 // ============================================================
 
 function closeEmployeeModal() {
 
   const modal =
-    document.getElementById("employeeModal");
+    document.getElementById(
+      "employeeModal"
+    );
 
 
   if (modal) {
@@ -1460,30 +1765,38 @@ function closeEmployeeModal() {
 // FORM MESSAGE
 // ============================================================
 
-function showFormMessage(message, type) {
+function showFormMessage(
+  text,
+  type
+) {
 
-  const element =
-    document.getElementById("employeeFormMessage");
-
-
-  if (!element) return;
-
-
-  element.textContent =
-    message;
+  const message =
+    document.getElementById(
+      "employeeFormMessage"
+    );
 
 
-  element.className =
-    "form-message " + type;
+  if (!message) return;
+
+
+  message.textContent =
+    text;
+
+
+  message.className =
+    "form-message " +
+    (type || "");
 
 }
 
 
 // ============================================================
-// CURRENCY
+// FORMAT CURRENCY
 // ============================================================
 
-function formatCurrency(value) {
+function formatCurrency(
+  value
+) {
 
   if (
     value === "" ||
@@ -1497,7 +1810,7 @@ function formatCurrency(value) {
   }
 
 
-  return new Intl.NumberFormat(
+  return Number(value).toLocaleString(
     "en-IN",
     {
 
@@ -1508,35 +1821,47 @@ function formatCurrency(value) {
       maximumFractionDigits: 0
 
     }
-  ).format(Number(value));
+  );
 
 }
 
 
 // ============================================================
-// HTML SECURITY
+// ESCAPE HTML
 // ============================================================
 
 function escapeHtml(value) {
 
-  if (value === null ||
-      value === undefined) {
+  return String(
+    value === null ||
+    value === undefined
+      ? ""
+      : value
+  )
 
-    return "";
+    .replace(
+      /&/g,
+      "&amp;"
+    )
 
-  }
+    .replace(
+      /</g,
+      "&lt;"
+    )
 
+    .replace(
+      />/g,
+      "&gt;"
+    )
 
-  return String(value)
+    .replace(
+      /"/g,
+      "&quot;"
+    )
 
-    .replace(/&/g, "&amp;")
-
-    .replace(/</g, "&lt;")
-
-    .replace(/>/g, "&gt;")
-
-    .replace(/"/g, "&quot;")
-
-    .replace(/'/g, "&#039;");
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
 }
