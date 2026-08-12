@@ -11,9 +11,10 @@
 
   <title>VVKF | Attendance & Payroll</title>
 
+  <!-- CSS -->
   <link
     rel="stylesheet"
-    href="css/style.css">
+    href="style.css">
 
 </head>
 
@@ -22,7 +23,10 @@
 
   <div class="app">
 
-    <!-- SIDEBAR -->
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
     <aside class="sidebar">
 
@@ -32,7 +36,7 @@
           V
         </div>
 
-        <div>
+        <div class="brand-text">
 
           <div class="brand-name">
             VVKF
@@ -49,13 +53,16 @@
 
       <nav class="navigation">
 
+
         <button
           class="nav-item active"
           data-page="dashboard">
 
           <span class="nav-icon">▦</span>
 
-          <span>Dashboard</span>
+          <span>
+            Dashboard
+          </span>
 
         </button>
 
@@ -66,7 +73,9 @@
 
           <span class="nav-icon">♙</span>
 
-          <span>Employees</span>
+          <span>
+            Employees
+          </span>
 
         </button>
 
@@ -77,7 +86,9 @@
 
           <span class="nav-icon">✓</span>
 
-          <span>Attendance</span>
+          <span>
+            Attendance
+          </span>
 
         </button>
 
@@ -88,7 +99,9 @@
 
           <span class="nav-icon">₹</span>
 
-          <span>Payroll</span>
+          <span>
+            Payroll
+          </span>
 
         </button>
 
@@ -99,7 +112,9 @@
 
           <span class="nav-icon">▤</span>
 
-          <span>Reports</span>
+          <span>
+            Reports
+          </span>
 
         </button>
 
@@ -108,13 +123,16 @@
 
       <div class="sidebar-bottom">
 
+
         <button
           class="nav-item"
           data-page="settings">
 
           <span class="nav-icon">⚙</span>
 
-          <span>Settings</span>
+          <span>
+            Settings
+          </span>
 
         </button>
 
@@ -136,14 +154,20 @@
     </aside>
 
 
-    <!-- MAIN -->
+
+    <!-- =====================================================
+         MAIN AREA
+    ====================================================== -->
 
     <main class="main">
 
 
-      <!-- TOP BAR -->
+      <!-- ===================================================
+           TOP BAR
+      ==================================================== -->
 
       <header class="topbar">
+
 
         <div class="mobile-brand">
           VVKF
@@ -165,15 +189,20 @@
 
         <div class="topbar-right">
 
-          <div class="current-date" id="currentDate">
+
+          <div
+            class="current-date"
+            id="currentDate">
           </div>
 
 
           <div class="user-profile">
 
+
             <div class="user-avatar">
               A
             </div>
+
 
             <div class="user-details">
 
@@ -187,21 +216,28 @@
 
             </div>
 
+
           </div>
+
 
         </div>
 
       </header>
 
 
-      <!-- CONTENT -->
+
+      <!-- ===================================================
+           CONTENT
+      ==================================================== -->
 
       <section
         class="content"
         id="appContent">
 
 
-        <!-- DASHBOARD -->
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
 
         <div
           id="dashboardPage"
@@ -210,23 +246,24 @@
 
           <div class="welcome">
 
-            <div>
+            <h2>
+              Good morning, Admin
+            </h2>
 
-              <h2>
-                Good morning, Admin
-              </h2>
-
-              <p>
-                Here's your workforce overview.
-              </p>
-
-            </div>
+            <p>
+              Here's your workforce overview.
+            </p>
 
           </div>
 
 
+
+          <!-- STAT CARDS -->
+
           <div class="stats-grid">
 
+
+            <!-- TOTAL EMPLOYEES -->
 
             <div class="stat-card">
 
@@ -249,6 +286,9 @@
             </div>
 
 
+
+            <!-- ACTIVE EMPLOYEES -->
+
             <div class="stat-card">
 
               <div class="stat-icon green">
@@ -270,6 +310,9 @@
             </div>
 
 
+
+            <!-- ATTENDANCE -->
+
             <div class="stat-card">
 
               <div class="stat-icon orange">
@@ -290,6 +333,9 @@
 
             </div>
 
+
+
+            <!-- PAYROLL -->
 
             <div class="stat-card">
 
@@ -315,10 +361,16 @@
           </div>
 
 
+
+          <!-- DASHBOARD PANELS -->
+
           <div class="dashboard-grid">
 
 
+            <!-- WORKFORCE -->
+
             <div class="panel">
+
 
               <div class="panel-header">
 
@@ -347,10 +399,15 @@
 
               </div>
 
+
             </div>
 
 
+
+            <!-- QUICK ACTIONS -->
+
             <div class="panel">
+
 
               <div class="panel-header">
 
@@ -370,6 +427,7 @@
 
 
               <div class="quick-actions">
+
 
                 <button
                   data-page="employees">
@@ -410,7 +468,9 @@
 
                 </button>
 
+
               </div>
+
 
             </div>
 
@@ -421,11 +481,15 @@
         </div>
 
 
-        <!-- OTHER PAGES -->
+
+        <!-- =================================================
+             EMPLOYEES
+        ================================================== -->
 
         <div
           id="employeesPage"
           class="page">
+
 
           <div class="page-placeholder">
 
@@ -443,12 +507,19 @@
 
           </div>
 
+
         </div>
 
+
+
+        <!-- =================================================
+             ATTENDANCE
+        ================================================== -->
 
         <div
           id="attendancePage"
           class="page">
+
 
           <div class="page-placeholder">
 
@@ -466,12 +537,19 @@
 
           </div>
 
+
         </div>
 
+
+
+        <!-- =================================================
+             PAYROLL
+        ================================================== -->
 
         <div
           id="payrollPage"
           class="page">
+
 
           <div class="page-placeholder">
 
@@ -489,12 +567,19 @@
 
           </div>
 
+
         </div>
 
+
+
+        <!-- =================================================
+             REPORTS
+        ================================================== -->
 
         <div
           id="reportsPage"
           class="page">
+
 
           <div class="page-placeholder">
 
@@ -507,17 +592,24 @@
             </h2>
 
             <p>
-              Reports module will be built here.
+              Attendance and payroll reports will be built here.
             </p>
 
           </div>
 
+
         </div>
 
+
+
+        <!-- =================================================
+             SETTINGS
+        ================================================== -->
 
         <div
           id="settingsPage"
           class="page">
+
 
           <div class="page-placeholder">
 
@@ -535,17 +627,26 @@
 
           </div>
 
+
         </div>
 
 
       </section>
 
+
     </main>
+
 
   </div>
 
 
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
+
   <script src="js/app.js"></script>
+
 
 </body>
 
